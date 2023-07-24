@@ -21,7 +21,6 @@ export const useUserStore = defineStore("user", {
 
     async login(loginForm) {
       const { data } = await post("login", loginForm);
-
       return data;
     },
 
@@ -30,6 +29,9 @@ export const useUserStore = defineStore("user", {
     },
 
     setUser(payload) {
+      console.log("oi");
+      window.localStorage.setItem("user", JSON.stringify(payload));
+
       if (payload.id) this.id = payload.id;
       if (payload.name) this.name = payload.name;
       if (payload.email) this.email = payload.email;

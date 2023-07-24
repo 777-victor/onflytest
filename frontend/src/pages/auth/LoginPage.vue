@@ -74,7 +74,7 @@ async function onSubmit() {
     userStore.setUser(data.user);
     userStore.setToken(data.token);
 
-    router.push({ path: "/" });
+    router.push({ path: "/expenses" });
   }
 }
 </script>

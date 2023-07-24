@@ -5,12 +5,7 @@
         <p class="text-h4">Add Expense</p>
       </q-card-title>
       <q-card-section>
-        <q-form
-          @submit="onSubmit"
-          @reset="onReset"
-          class="row q-col-gutter-md"
-          ref="myForm"
-        >
+        <q-form @submit="onSubmit" class="row q-col-gutter-md" ref="myForm">
           <q-input
             outlined
             v-model="expense.description"
@@ -27,13 +22,13 @@
 
           <q-input
             v-model="expense.value"
-            type="number"
             label="Value"
             outlined
             class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
+            mask="#.##"
             :rules="[
               (val) => (val && val.length > 0) || 'Value is missing',
-              (val) => (val && val.length < 0) || 'Value cannot be less than 0',
+              (val) => (val && val > 0) || 'Value cannot be less than 0',
             ]"
           />
           <q-input
@@ -42,10 +37,7 @@
             label="Date of expense"
             outlined
             class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
-            :rules="[
-              (val) => (val && val.length > 0) || 'Date is missing',
-              (val) => (val && val.length < 0) || 'Value cannot be less than 0',
-            ]"
+            :rules="[(val) => (val && val.length > 0) || 'Date is missing']"
           />
 
           <div class="col-12 row justify-center">
@@ -56,9 +48,9 @@
               color="primary"
             />
             <q-btn
-              label="Reset"
-              type="reset"
+              label="Back"
               color="default"
+              @click="goBack()"
               class="text-grey-10 q-ml-md"
             />
           </div>
@@ -68,68 +60,63 @@
   </q-page>
 </template>
 
-<script>
+<script setup>
+import { useQuasar } from "quasar";
 import { post } from "src/helpers/request";
 import { useUserStore } from "src/stores/user-store";
+import { storeToRefs } from "pinia";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-export default {
-  name: "ExpenseForm",
-  data() {
-    return {
-      submiting: false,
-      expense: {
-        description: "",
-        value: 0.0,
-        date: "",
-        user_id: null,
-      },
-    };
-  },
-  methods: {
-    onSubmit() {
-      this.submiting = true;
-      const userStore = useUserStore();
-      expense.user_id = userStore.getId();
+const userStore = useUserStore();
+const $q = useQuasar();
+const { getId } = storeToRefs(userStore);
+const submiting = ref(false);
+const router = useRouter();
+const expense = ref({
+  description: "teste",
+  value: 1.1,
+  date: new Date().toDateString(),
+  user_id: null,
+});
 
-      post("expenses", this.expense)
-        .then((response) => {
-          if (response.status == 201) {
-            const { data } = response;
+async function onSubmit() {
+  submiting.value = true;
+  console.log(getId.value);
+  const user = JSON.parse(window.localStorage.getItem("user"));
+  let userId = getId.value ?? user.id;
+  expense.value.user_id = userId;
 
-            this.$q.notify({
-              message: "Expense registered successfully",
-              color: "positive",
-              icon: "check_circle_outline",
-            });
-            this.$router.push({ path: "/expenses" });
-          }
-        })
-        .catch((error) => {
-          let message =
-            error.response?.data?.message || "Failed to register a expense";
+  post("expenses", expense.value)
+    .then((response) => {
+      if (response.status == 201) {
+        const { data } = response;
 
-          this.$q.notify({
-            message: message,
-            color: "negative",
-            icon: "error",
-          });
-        })
-        .finally(() => {
-          this.submiting = false;
+        $q.notify({
+          message: "Expense registered successfully",
+          color: "positive",
+          icon: "check_circle_outline",
         });
-    },
-    async onReset() {
-      await this.resetForm();
-      this.$refs.myForm.resetValidation();
-    },
-    async resetForm() {
-      this.expense = {
-        description: "",
-        value: 0.0,
-        date: "",
-        user_id: null,
-      };
-    },
-  },
-};
+        router.push({ path: "/expenses" });
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      let message =
+        error.response?.data?.message || "Failed to register a expense";
+
+      $q.notify({
+        message: message,
+        color: "negative",
+        icon: "error",
+      });
+    })
+    .finally(() => {
+      submiting.value = false;
+    });
+}
+
+async function goBack() {
+  router.push("/expenses");
+}
 </script>
