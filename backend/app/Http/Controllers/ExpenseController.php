@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Expense;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
@@ -11,7 +12,7 @@ class ExpenseController extends Controller
      */
     public function index()
     {
-        //
+        return Expense::all();
     }
 
     /**
@@ -19,7 +20,11 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return Expense::create([
+            'value' => (float) 49.90,
+            'description' => (string) "Test resource",
+            'user_id' => 1
+        ]);
     }
 
     /**
@@ -27,7 +32,9 @@ class ExpenseController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $expense = Expense::find($id);
+
+        return $expense;
     }
 
     /**

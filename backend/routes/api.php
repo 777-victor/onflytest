@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,10 +17,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('/register', [UserController::class, 'register']);
+Route::post("/login", [AuthController::class, 'login']);
 
-Route::get("/test", function (Request $request) {
-    return response()->json(['opa' => 'deu'], 200);
-});
+Route::middleware('auth:sanctum')
+    // ->controller(ExpenseController::class)
+    ->group(
+        function () {
+
+            /* Expenses Requests */
+            Route::get("/expenses", [ExpenseController::class, 'index']);
+            Route::get("/expenses/{id}", [ExpenseController::class, 'show']);
+            Route::post("/expenses", [ExpenseController::class, 'store']);
+            Route::put("/expenses/{id}", [ExpenseController::class, 'update']);
+            Route::delete("/expenses/{id}", [ExpenseController::class, 'destroy']);
+
+            Route::post("/logout", [AuthController::class, 'logout']);
+        }
+    );
