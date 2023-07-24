@@ -2,11 +2,18 @@ import { api } from "src/boot/axios";
 
 export async function post(url, data) {
   try {
-    const response = await api.post(url, data);
+    return await api.post(url, data);
   } catch (err) {
     console.log(err);
-    throw new Error(err);
+    if (err) throw err;
   }
+}
 
-  return response;
+export async function get(url) {
+  try {
+    return await api.get(url);
+  } catch (err) {
+    console.log(err);
+    if (err) throw err;
+  }
 }

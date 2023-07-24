@@ -33,5 +33,6 @@ Route::middleware('auth:sanctum')
             Route::delete("/expenses/{id}", [ExpenseController::class, 'destroy']);
 
             Route::post("/logout", [AuthController::class, 'logout']);
+            Route::get("/user", [UserController::class, 'getAuthenticatedUser']);
         }
     );

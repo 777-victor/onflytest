@@ -43,9 +43,9 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $user = User::where('email',  $this->only('email'))->first();
+        $user = User::where('email',  $this->input('email'))->first();
 
-        if (!$user || !Hash::check($this->only('password'), $user->password)) {
+        if (!$user || !Hash::check($this->input('password'), $user->password)) {
 
             RateLimiter::hit($this->throttleKey());
             abort(401, 'Invalid credentials');

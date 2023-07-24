@@ -46,17 +46,35 @@
 
 <script setup>
 import { useQuasar } from "quasar";
-import { ref } from "vue";
-import { post } from "src/helpers/request";
+import { ref, onMounted } from "vue";
+import { useUserStore } from "src/stores/user-store";
+import { useRouter } from "vue-router";
 
 const $q = useQuasar();
+const router = useRouter();
+const userStore = useUserStore();
 const login = ref({
   email: "",
   password: "",
 });
 
+onMounted(() => {
+  const token = window.localStorage.getItem("access_token");
+  if (token) {
+    console.log("token found");
+    router.push({ path: "/" });
+  }
+});
+
 async function onSubmit() {
-  const data = await post("login", login);
-  console.log(data);
+  await userStore.getSanctumCookie();
+  const data = await userStore.login(login.value);
+
+  if (data.user) {
+    userStore.setUser(data.user);
+    window.localStorage.setItem("access_token", data.user.token);
+
+    router.push({ path: "/" });
+  }
 }
 </script>

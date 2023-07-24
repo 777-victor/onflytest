@@ -36,4 +36,9 @@ class UserController extends Controller
             'token' => $token
         ]);
     }
+
+    public function getAuthenticatedUser(Request $request)
+    {
+        return $request->user();
+    }
 }
