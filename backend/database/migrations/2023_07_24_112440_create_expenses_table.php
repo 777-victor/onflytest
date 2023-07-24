@@ -16,8 +16,9 @@ return new class extends Migration
             $table->timestamps();
             $table->string('description', 191);
             $table->float('value');
-            $table->unsignedBigInteger('user_id');
+            $table->timestamp('date');
 
+            $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
         });
     }

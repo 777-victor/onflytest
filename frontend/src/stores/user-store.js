@@ -36,6 +36,10 @@ export const useUserStore = defineStore("user", {
       if (payload.token) this.email = payload.token;
     },
 
+    setToken(token) {
+      window.localStorage.setItem("access_token", token);
+    },
+
     clearUser() {
       this.id = null;
       this.name = null;

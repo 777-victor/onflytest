@@ -72,7 +72,7 @@ async function onSubmit() {
 
   if (data.user) {
     userStore.setUser(data.user);
-    window.localStorage.setItem("access_token", data.user.token);
+    userStore.setToken(data.token);
 
     router.push({ path: "/" });
   }

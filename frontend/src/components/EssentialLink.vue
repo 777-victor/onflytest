@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable :to="route" exact>
+  <q-item clickable @click="redirect(route)">
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" />
     </q-item-section>
@@ -12,6 +12,7 @@
 
 <script>
 import { defineComponent } from "vue";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "EssentialLink",
@@ -29,6 +30,16 @@ export default defineComponent({
       type: String,
       default: "",
     },
+  },
+
+  setup() {
+    const router = useRouter();
+
+    return {
+      redirect(route) {
+        router.push({ path: route.name });
+      },
+    };
   },
 });
 </script>

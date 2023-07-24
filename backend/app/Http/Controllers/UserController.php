@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegisterUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
@@ -15,14 +16,8 @@ class UserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function register(Request $request)
+    public function register(RegisterUserRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:' . User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -30,15 +25,16 @@ class UserController extends Controller
         ]);
 
         $token = $user->createToken('firstToken')->plainTextToken;
+        $userResource = new UserResource($user);
 
         return response([
-            'user' => $user,
+            'user' => $userResource,
             'token' => $token
         ]);
     }
 
-    public function getAuthenticatedUser(Request $request)
+    public function getAuthenticatedUser(Request $request): UserResource
     {
-        return $request->user();
+        return new UserResource($request->user());
     }
 }

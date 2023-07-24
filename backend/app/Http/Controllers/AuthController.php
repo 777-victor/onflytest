@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,8 +22,12 @@ class AuthController extends Controller
     {
         $user = $request->authenticate();
         $token = $user->createToken('firstToken')->plainTextToken;
-        $user->token = $token;
-        return response(['user' => $user], 200);
+        $userResource = new UserResource($user);
+
+        return response([
+            'user' => $userResource,
+            'token' => $token
+        ], 200);
     }
 
 
