@@ -1,8 +1,8 @@
 <template>
-  <q-page class="q-mt-lg bg-grey-2" padding>
+  <q-page class="bg-grey-2" padding>
     <q-card class="q-pa-md">
       <q-card-title class="relative-position">
-        <p class="text-h4">User registration</p>
+        <p class="text-h4">Add Expense</p>
       </q-card-title>
       <q-card-section>
         <q-form
@@ -13,47 +13,38 @@
         >
           <q-input
             outlined
-            v-model="form.name"
+            v-model="expense.description"
             color="deep-purple"
-            label="Name"
+            label="Description"
             class="col-md-12 col-sm-12 col-xs-12"
-            :rules="[(val) => (val && val.length > 0) || 'Name is missing']"
-          />
-
-          <q-input
-            v-model="form.email"
-            label="Email"
-            outlined
-            class="col-md-12 col-sm-12 col-xs-12"
-            :rules="[(val) => (val && val.length > 0) || 'Email is missing']"
-          />
-
-          <q-input
-            v-model="form.password"
-            type="password"
-            label="Password"
-            outlined
-            class="col-md-12 col-sm-12 col-xs-12"
-            unmasked-value
             :rules="[
-              (val) => (val && val.length > 0) || 'Password is missing',
-              (val) => (val && val.length >= 8) || 'minimum 8 characters',
+              (val) => (val && val.length > 0) || 'description is missing',
+              (val) =>
+                (val && val.length <= 191) ||
+                'description cannot have more than 191 characters',
             ]"
           />
 
           <q-input
-            v-model="form.password_confirmation"
-            type="password"
-            label="Password confirmation"
+            v-model="expense.value"
+            type="number"
+            label="Value"
             outlined
-            class="col-md-12 col-sm-12 col-xs-12"
-            unmasked-value
+            class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
             :rules="[
-              (val) =>
-                (val && val.length > 0) || 'Password confirmation is missing',
-              (val) =>
-                val === this.form.password ||
-                'The password confirmation does not match.',
+              (val) => (val && val.length > 0) || 'Value is missing',
+              (val) => (val && val.length < 0) || 'Value cannot be less than 0',
+            ]"
+          />
+          <q-input
+            v-model="expense.date"
+            type="date"
+            label="Date of expense"
+            outlined
+            class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
+            :rules="[
+              (val) => (val && val.length > 0) || 'Date is missing',
+              (val) => (val && val.length < 0) || 'Value cannot be less than 0',
             ]"
           />
 
@@ -82,32 +73,31 @@ import { post } from "src/helpers/request";
 import { useUserStore } from "src/stores/user-store";
 
 export default {
-  name: "RegisterPage",
+  name: "ExpenseForm",
   data() {
     return {
       submiting: false,
-      form: {
-        name: "",
-        email: "",
-        password: "",
-        password_confirmation: "",
+      expense: {
+        description: "",
+        value: 0.0,
+        date: "",
+        user_id: null,
       },
     };
   },
   methods: {
     onSubmit() {
       this.submiting = true;
+      const userStore = useUserStore();
+      expense.user_id = userStore.getId();
 
-      post("register", this.form)
+      post("expenses", this.expense)
         .then((response) => {
           if (response.status == 201) {
             const { data } = response;
-            const userStore = useUserStore();
-            userStore.setUser(data.user);
-            userStore.setToken(data.token);
 
             this.$q.notify({
-              message: "User registered successfully",
+              message: "Expense registered successfully",
               color: "positive",
               icon: "check_circle_outline",
             });
@@ -116,7 +106,7 @@ export default {
         })
         .catch((error) => {
           let message =
-            error.response?.data?.message || "Failed to register a user";
+            error.response?.data?.message || "Failed to register a expense";
 
           this.$q.notify({
             message: message,
@@ -133,11 +123,11 @@ export default {
       this.$refs.myForm.resetValidation();
     },
     async resetForm() {
-      this.form = {
-        name: "",
-        email: "",
-        password: "",
-        password_confirmation: "",
+      this.expense = {
+        description: "",
+        value: 0.0,
+        date: "",
+        user_id: null,
       };
     },
   },

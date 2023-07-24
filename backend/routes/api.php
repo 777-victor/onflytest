@@ -26,11 +26,12 @@ Route::middleware('auth:sanctum')
         function () {
 
             /* Expenses Requests */
-            Route::get("/expenses", [ExpenseController::class, 'index']);
-            Route::get("/expenses/{id}", [ExpenseController::class, 'show']);
-            Route::post("/expenses", [ExpenseController::class, 'store']);
-            Route::put("/expenses/{id}", [ExpenseController::class, 'update']);
-            Route::delete("/expenses/{id}", [ExpenseController::class, 'destroy']);
+            Route::apiResource("expenses", ExpenseController::class);
+            // Route::get("/expenses", [ExpenseController::class, 'index']);
+            // Route::get("/expenses/{id}", [ExpenseController::class, 'show']);
+            // Route::post("/expenses", [ExpenseController::class, 'store']);
+            // Route::put("/expenses/{id}", [ExpenseController::class, 'update']);
+            // Route::delete("/expenses/{id}", [ExpenseController::class, 'destroy']);
 
             Route::post("/logout", [AuthController::class, 'logout']);
             Route::get("/user", [UserController::class, 'getAuthenticatedUser']);

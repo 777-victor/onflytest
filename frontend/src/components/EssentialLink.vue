@@ -37,7 +37,7 @@ export default defineComponent({
 
     return {
       redirect(route) {
-        router.push({ path: route.name });
+        router.push({ path: "/" + route.name });
       },
     };
   },

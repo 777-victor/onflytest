@@ -33,7 +33,11 @@ const routes = [
     children: [
       {
         path: "",
-        component: () => import("pages/expense/ExpensesList.vue"),
+        component: () => import("pages/expense/ExpenseList.vue"),
+      },
+      {
+        path: "create",
+        component: () => import("pages/expense/ExpenseForm.vue"),
       },
     ],
   },
