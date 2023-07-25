@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\ExpenseCollection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -27,6 +28,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            // 'expenses' =>  $this->expenses
         ];
     }
 }
