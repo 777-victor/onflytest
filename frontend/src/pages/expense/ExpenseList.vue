@@ -1,38 +1,22 @@
 <template>
   <div class="q-pa-md">
     <q-table
+      :grid="$q.screen.xs"
+      flat
+      bordered
       title="Expenses"
       :rows="rows"
       :columns="columns"
-      row-key="description"
+      row-key="id"
+      :loading="loading"
+      v-model:pagination="pagination"
+      binary-state-sort
+      @request="listExpenses"
     >
       <template v-slot:top-right="">
-        <!-- <q-input
-        outlined
-        dense
-        debounce="300"
-        v-model="filter"
-        placeholder="Search"
-      >
-        <template v-slot:append>
-          <q-icon name="search" ></icon>
-        </template>
-      </q-input> -->
         <q-btn color="primary" :icon="'add'" @click="redirecToCreateExpense">
           <q-tooltip v-close-popup> {{ "Add new expense" }}</q-tooltip>
         </q-btn>
-
-        <!-- <q-btn
-          flat
-          round
-          dense
-          :icon="isGrid ? 'list' : 'grid_on'"
-          @click="isGrid = !isGrid"
-        >
-          <q-tooltip :disable="$q.platform.is.mobile" v-close-popup>{{
-            isGrid ? "List" : "Grid"
-          }}</q-tooltip>
-        </q-btn> -->
       </template>
 
       <template v-slot:body-cell-actions="props">
@@ -71,7 +55,7 @@ export default {
   name: "RegisterPage",
   data() {
     return {
-      submiting: false,
+      loading: false,
       columns: [
         {
           name: "description",
@@ -91,13 +75,14 @@ export default {
         { name: "date", align: "left", label: "Date", field: "date" },
         { name: "actions", label: "Actions", field: "", align: "center" },
       ],
-      rows: [
-        {
-          description: "gastei",
-          value: 0.0,
-          date: "",
-        },
-      ],
+      pagination: {
+        sortBy: "desc",
+        descending: false,
+        page: 1,
+        rowsPerPage: 3,
+        rowsNumber: 10,
+      },
+      rows: [],
     };
   },
 
@@ -108,11 +93,28 @@ export default {
     redirecToCreateExpense() {
       this.$router.push({ path: "/expenses/create" });
     },
-    listExpenses() {
-      get("expenses").then((response) => {
-        const { data } = response;
-        this.rows = data.expenses;
-      });
+
+    listExpenses(props) {
+      this.loading = true;
+      let { page, rowsPerPage } = this.pagination;
+
+      if (props) {
+        page = props.pagination.page;
+        rowsPerPage = props.pagination.rowsPerPage;
+      }
+
+      get(`expenses?page=${page}&perPage=${rowsPerPage}`)
+        .then((response) => {
+          const { data } = response;
+          this.rows = data.expenses;
+
+          const meta = data.meta;
+          this.pagination.page = meta.current_page;
+          this.pagination.rowsPerPage = meta.per_page;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
 
     editExpense(prop) {

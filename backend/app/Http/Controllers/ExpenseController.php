@@ -29,7 +29,7 @@ class ExpenseController extends Controller
     public function index(Request $request)
     {
         $expenses = Expense::where('user_id', '=', $request->user()->id)
-            ->paginate();
+            ->paginate(perPage: $request->perPage ?? 10);
         return new ExpenseCollection($expenses);
     }
 
