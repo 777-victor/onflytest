@@ -1,9 +1,9 @@
 <template>
   <q-page class="q-mt-lg bg-grey-2" padding>
     <q-card class="q-pa-md">
-      <q-card-title class="relative-position">
+      <q-card-section class="relative-position">
         <p class="text-h4">User registration</p>
-      </q-card-title>
+      </q-card-section>
       <q-card-section>
         <q-form
           @submit="onSubmit"
@@ -111,7 +111,6 @@ export default {
               color: "positive",
               icon: "check_circle_outline",
             });
-            this.$router.push({ path: "/expenses" });
           }
         })
         .catch((error) => {
@@ -126,6 +125,7 @@ export default {
         })
         .finally(() => {
           this.submiting = false;
+          this.$router.push({ path: "/expenses" });
         });
     },
     async onReset() {

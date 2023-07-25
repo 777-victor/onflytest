@@ -32,11 +32,13 @@
       <q-card-section class="text-center q-pt-none">
         <div class="text-grey-8">
           Don't have an account yet?
-          <a
-            href="#"
+          <q-btn
+            size="small"
+            flat
+            :to="{ path: '/register' }"
             class="text-dark text-weight-bold"
             style="text-decoration: none"
-            >Sign up.</a
+            >Sign up</q-btn
           >
         </div>
       </q-card-section>
@@ -62,7 +64,7 @@ onMounted(() => {
   const token = window.localStorage.getItem("access_token");
   if (token) {
     console.log("token found");
-    router.push({ path: "/" });
+    router.push({ path: "/expenses" });
   }
 });
 

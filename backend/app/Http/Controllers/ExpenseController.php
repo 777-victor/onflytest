@@ -2,21 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DestroyExpenseRequest;
 use App\Http\Requests\StoreExpenseRequest;
+use App\Http\Requests\UpdateExpenseRequest;
 use App\Http\Resources\ExpenseCollection;
 use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ExpenseController extends Controller
 {
+
+    /**
+     * Create the controller instance.
+     */
+    public function __construct()
+    {
+        $this->authorizeResource(Expense::class, 'expense');
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //return ExpenseCollection()
-        return Expense::all();
+        $expenses = Expense::where('user_id', '=', $request->user()->id)
+            ->paginate();
+        return new ExpenseCollection($expenses);
     }
 
     /**
@@ -27,8 +40,8 @@ class ExpenseController extends Controller
         $expense = Expense::create([
             'value' => $request->value,
             'date' => $request->date,
-            'description' => $request->description,
-            'user_id' => $request->user_id
+            'description' => trim($request->description),
+            'user_id' => $request->user()->id // or $request->user_id ?
         ]);
 
         $expenseResource = new ExpenseResource($expense);
@@ -39,24 +52,41 @@ class ExpenseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id): ExpenseResource
+    public function show(Expense $expense): ExpenseResource
     {
-        return new ExpenseResource(Expense::findOrFail($id));
+        return new ExpenseResource($expense);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateExpenseRequest $request, Expense $expense)
     {
-        //
+        $message = "Nothing to update.";
+        $attributes = [
+            'description' => trim($request->description),
+            'value' => $request->value,
+            'date' => $request->date,
+        ];
+
+        $expense->fill($attributes);
+
+        if ($expense->isDirty()) {
+            $message = "Expense updated successfully";
+            $expense->save();
+        }
+        $resource = new ExpenseResource($expense);
+
+        return response(['message' => $message, $resource]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Expense $expense)
     {
-        //
+        $expense->delete();
+        $expense->save();
+        return response(['message' => 'Expense deleted successfully']);
     }
 }

@@ -24,6 +24,12 @@ export const useUserStore = defineStore("user", {
       return data;
     },
 
+    async logout() {
+      window.localStorage.clear();
+      window.location.reload();
+      this.clearUser();
+    },
+
     async fetchUser() {
       return await get("/user");
     },
@@ -46,6 +52,7 @@ export const useUserStore = defineStore("user", {
       this.id = null;
       this.name = null;
       this.email = null;
+      this.token = null;
     },
   },
 });

@@ -6,6 +6,7 @@ const routes = [
   },
 
   {
+    name: "auth",
     path: "/auth",
     component: () => import("layouts/LoginLayout.vue"),
     children: [
@@ -37,6 +38,10 @@ const routes = [
       },
       {
         path: "create",
+        component: () => import("pages/expense/ExpenseForm.vue"),
+      },
+      {
+        path: "edit/:id",
         component: () => import("pages/expense/ExpenseForm.vue"),
       },
     ],

@@ -1,6 +1,11 @@
 <template>
   <div class="q-pa-md">
-    <q-table title="Treats" :rows="rows" :columns="columns" row-key="name">
+    <q-table
+      title="Expenses"
+      :rows="rows"
+      :columns="columns"
+      row-key="description"
+    >
       <template v-slot:top-right="">
         <!-- <q-input
         outlined
@@ -13,11 +18,11 @@
           <q-icon name="search" ></icon>
         </template>
       </q-input> -->
-        <q-btn flat round dense :icon="'add'" @click="redirecToCreateExpense">
+        <q-btn color="primary" :icon="'add'" @click="redirecToCreateExpense">
           <q-tooltip v-close-popup> {{ "Add new expense" }}</q-tooltip>
         </q-btn>
 
-        <q-btn
+        <!-- <q-btn
           flat
           round
           dense
@@ -27,13 +32,40 @@
           <q-tooltip :disable="$q.platform.is.mobile" v-close-popup>{{
             isGrid ? "List" : "Grid"
           }}</q-tooltip>
-        </q-btn>
+        </q-btn> -->
+      </template>
+
+      <template v-slot:body-cell-actions="props">
+        <q-td :props="props">
+          <q-btn
+            dense
+            round
+            flat
+            color="grey"
+            @click="editExpense(props)"
+            icon="edit"
+          >
+            <q-tooltip v-close-popup> Edit expense </q-tooltip>
+          </q-btn>
+          <q-btn
+            dense
+            round
+            flat
+            color="grey"
+            @click="deleteExpense(props)"
+            icon="delete"
+          >
+            <q-tooltip v-close-popup> Remove expense </q-tooltip>
+          </q-btn>
+        </q-td>
       </template>
     </q-table>
   </div>
 </template>
 
 <script>
+import { get } from "../../helpers/request";
+
 export default {
   name: "RegisterPage",
   data() {
@@ -56,6 +88,13 @@ export default {
           sortable: true,
         },
         { name: "date", align: "left", label: "Date", field: "date" },
+        { name: "actions", label: "Actions", field: "", align: "center" },
+        // {
+        //   name: "action",
+        //   align: "center",
+        //   label: "Action",
+        //   field: "",
+        // },
       ],
       rows: [
         {
@@ -66,16 +105,31 @@ export default {
       ],
     };
   },
-  computed: {
-    // isGrid(){
-    //   get: _ => attrs?.grid,
-    //   set: v => { emit('update:grid', v) }
-    // }
+
+  mounted() {
+    this.listExpenses();
   },
   methods: {
     redirecToCreateExpense() {
       // const router = useRouter();
       this.$router.push({ path: "/expenses/create" });
+    },
+    listExpenses() {
+      get("expenses").then((response) => {
+        const { data } = response;
+        this.rows = data.expenses;
+      });
+    },
+
+    editExpense(prop) {
+      let item = prop.row;
+      this.$router.push({ path: "/expenses/edit/" + item.id });
+    },
+
+    deleteExpense(item) {
+      //sweet alert
+      // alert()
+      // this.$router.push({ path: "/expenses/edit/" + item.id });
     },
   },
 };

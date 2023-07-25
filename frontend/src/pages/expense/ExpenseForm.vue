@@ -1,9 +1,9 @@
 <template>
   <q-page class="bg-grey-2" padding>
     <q-card class="q-pa-md">
-      <q-card-title class="relative-position">
-        <p class="text-h4">Add Expense</p>
-      </q-card-title>
+      <q-card-section class="relative-position">
+        <p class="text-h4">{{ editing ? "Edit" : "Add" }} Expense</p>
+      </q-card-section>
       <q-card-section>
         <q-form @submit="onSubmit" class="row q-col-gutter-md" ref="myForm">
           <q-input
@@ -27,14 +27,14 @@
             class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
             mask="#.##"
             :rules="[
-              (val) => (val && val.length > 0) || 'Value is missing',
+              (val) => val || 'Value is missing',
               (val) => (val && val > 0) || 'Value cannot be less than 0',
             ]"
           />
           <q-input
             v-model="expense.date"
             type="date"
-            label="Date of expense"
+            label="Date of the expense"
             outlined
             class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
             :rules="[(val) => (val && val.length > 0) || 'Date is missing']"
@@ -62,36 +62,81 @@
 
 <script setup>
 import { useQuasar } from "quasar";
-import { post } from "src/helpers/request";
 import { useUserStore } from "src/stores/user-store";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { get, post, put } from "../../helpers/request";
 
 const userStore = useUserStore();
 const $q = useQuasar();
 const { getId } = storeToRefs(userStore);
 const submiting = ref(false);
+const editing = ref(false);
 const router = useRouter();
+const route = useRoute(); // actual route
 const expense = ref({
+  id: null,
   description: "teste",
   value: 1.1,
   date: new Date().toDateString(),
   user_id: null,
 });
 
-async function onSubmit() {
+onMounted(async () => {
+  editing.value = route.params?.id;
+  if (editing.value) {
+    const { data } = await fetchExpense(route.params.id);
+    console.log(data);
+    expense.value = data.expense;
+  }
+});
+
+async function fetchExpense(id) {
+  return await get("/expenses/" + id);
+}
+
+function onSubmit() {
   submiting.value = true;
-  console.log(getId.value);
   const user = JSON.parse(window.localStorage.getItem("user"));
   let userId = getId.value ?? user.id;
   expense.value.user_id = userId;
 
+  editing.value == true ? handleAddExpense() : handleUpdateExpense();
+}
+
+function handleAddExpense() {
   post("expenses", expense.value)
     .then((response) => {
       if (response.status == 201) {
-        const { data } = response;
+        $q.notify({
+          message: "Expense registered successfully",
+          color: "positive",
+          icon: "check_circle_outline",
+        });
+        router.push({ path: "/expenses" });
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      let message =
+        error.response?.data?.message || "Failed to register a expense";
 
+      $q.notify({
+        message: message,
+        color: "negative",
+        icon: "error",
+      });
+    })
+    .finally(() => {
+      submiting.value = false;
+    });
+}
+
+function handleUpdateExpense() {
+  put("expenses/" + expense.value.id, expense.value)
+    .then((response) => {
+      if (response.status == 201) {
         $q.notify({
           message: "Expense registered successfully",
           color: "positive",

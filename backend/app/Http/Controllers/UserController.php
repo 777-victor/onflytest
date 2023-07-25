@@ -30,7 +30,7 @@ class UserController extends Controller
         return response([
             'user' => $userResource,
             'token' => $token
-        ]);
+        ], 201);
     }
 
     public function getAuthenticatedUser(Request $request): UserResource
