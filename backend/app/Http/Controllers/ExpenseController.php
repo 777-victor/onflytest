@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateExpenseRequest;
 use App\Http\Resources\ExpenseCollection;
 use App\Http\Resources\ExpenseResource;
 use App\Models\Expense;
+use App\Notifications\ExpenseRegistered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -45,6 +46,8 @@ class ExpenseController extends Controller
         ]);
 
         $expenseResource = new ExpenseResource($expense);
+
+        $request->user()->notify(new ExpenseRegistered());
 
         return response([$expenseResource], 201);
     }

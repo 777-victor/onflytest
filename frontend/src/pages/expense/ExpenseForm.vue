@@ -25,7 +25,7 @@
             label="Value"
             outlined
             class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
-            mask="#.##"
+            mask="##.##"
             :rules="[
               (val) => (val && val > 0) || 'Value cannot be less than 0',
             ]"
@@ -76,9 +76,9 @@ const router = useRouter();
 const route = useRoute(); // actual route
 const expense = ref({
   id: null,
-  description: "teste",
-  value: 1.1,
-  date: new Date().toDateString(),
+  description: "",
+  value: 0,
+  date: "",
   user_id: null,
 });
 
@@ -86,7 +86,6 @@ onMounted(async () => {
   editing.value = route.params.id !== undefined;
   if (editing.value) {
     const { data } = await fetchExpense(route.params.id);
-    console.log(data);
     expense.value = data.expense;
   }
 });
@@ -105,7 +104,6 @@ function onSubmit() {
 }
 
 function handleAddExpense() {
-  console.log("hello");
   post("expenses", expense.value)
     .then((response) => {
       if (response.status == 201) {
@@ -118,7 +116,6 @@ function handleAddExpense() {
       }
     })
     .catch((error) => {
-      console.log(error);
       let message =
         error.response?.data?.message || "Failed to register a expense";
 
@@ -136,7 +133,6 @@ function handleAddExpense() {
 function handleUpdateExpense() {
   put("expenses/" + expense.value.id, expense.value)
     .then((response) => {
-      console.log(response);
       $q.notify({
         message: response.data.message,
         color: "positive",
@@ -145,7 +141,6 @@ function handleUpdateExpense() {
       router.push({ path: "/expenses" });
     })
     .catch((error) => {
-      console.log(error);
       let message =
         error.response?.data?.message || "Failed to update this expense";
 
