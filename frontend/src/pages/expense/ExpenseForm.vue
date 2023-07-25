@@ -30,14 +30,33 @@
               (val) => (val && val > 0) || 'Value cannot be less than 0',
             ]"
           />
+
           <q-input
             v-model="expense.date"
+            label="Date of the expense"
+            class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
+            outlined
+            mask="date"
+            :rules="['required', 'date']"
+          >
+            <template v-slot:append>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy>
+                  <q-date v-model="expense.date"></q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+
+          <!-- <q-input
+            v-model="expense.date"
             type="date"
+            mask="YYYY-MM-DD"
             label="Date of the expense"
             outlined
             class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
             :rules="[(val) => (val && val.length > 0) || 'Date is missing']"
-          />
+          /> -->
 
           <div class="col-12 row justify-center">
             <q-btn

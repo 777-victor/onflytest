@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-md">
     <q-table
-      :grid="$q.screen.xs"
+      :grid="grid"
       flat
       bordered
       title="Expenses"
@@ -20,6 +20,7 @@
       </template>
 
       <template v-slot:body-cell-actions="props">
+        <!-- <component :is="grid ? 'div' : 'q-td'" :props="props"> -->
         <q-td :props="props">
           <q-btn
             dense
@@ -42,6 +43,7 @@
             <q-tooltip v-close-popup> Remove expense </q-tooltip>
           </q-btn>
         </q-td>
+        <!-- </component> -->
       </template>
     </q-table>
   </div>
@@ -85,6 +87,11 @@ export default {
       rows: [],
     };
   },
+  computed: {
+    grid() {
+      return this.$q.screen.xs;
+    },
+  },
 
   mounted() {
     this.listExpenses();
@@ -111,6 +118,7 @@ export default {
           const meta = data.meta;
           this.pagination.page = meta.current_page;
           this.pagination.rowsPerPage = meta.per_page;
+          this.pagination.rowsNumber = meta.total;
         })
         .finally(() => {
           this.loading = false;
