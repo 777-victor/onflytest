@@ -63,20 +63,27 @@ const login = ref({
 onMounted(() => {
   const token = window.localStorage.getItem("access_token");
   if (token) {
-    console.log("token found");
     router.push({ path: "/expenses" });
   }
 });
 
 async function onSubmit() {
   await userStore.getSanctumCookie();
-  const data = await userStore.login(login.value);
+  try {
+    const data = await userStore.login(login.value);
 
-  if (data.user) {
-    userStore.setUser(data.user);
-    userStore.setToken(data.token);
+    if (data.user) {
+      userStore.setUser(data.user);
+      userStore.setToken(data.token);
 
-    router.push({ path: "/expenses" });
+      router.push({ path: "/expenses" });
+    }
+  } catch (err) {
+    $q.notify({
+      message: err.response.message ?? "Invalid credentials",
+      color: "negative",
+      icon: "error",
+    });
   }
 }
 </script>

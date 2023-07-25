@@ -15,7 +15,7 @@ export async function get(url) {
     return await api.get(url);
   } catch (err) {
     console.log(err);
-    if (err.response.status == 401) {
+    if (err.response.status == 401 || err.response.status == 403) {
       const userStore = useUserStore();
       userStore.logout();
     }

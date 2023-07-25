@@ -2,32 +2,11 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+        <q-toolbar-title> Quasar App v{{ $q.version }} </q-toolbar-title>
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+        <q-btn flat dense round icon="logout" @click="logout" />
       </q-toolbar>
     </q-header>
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Menu </q-item-label>
-
-        <EssentialLink
-          v-for="route in routeLists"
-          :key="route.title"
-          v-bind="route"
-        />
-      </q-list>
-    </q-drawer>
 
     <q-page-container>
       <router-view />
@@ -37,31 +16,20 @@
 
 <script>
 import { defineComponent, ref } from "vue";
-import EssentialLink from "components/EssentialLink.vue";
+import { useRouter } from "vue-router";
+import { useUserStore } from "./../stores/user-store";
 
-const routeList = [
-  {
-    title: "Expenses",
-    icon: "money",
-    route: { name: "expenses" },
-  },
-];
+const userStore = useUserStore();
+const router = useRouter();
 
 export default defineComponent({
   name: "MainLayout",
 
-  components: {
-    EssentialLink,
-  },
-
   setup() {
-    const leftDrawerOpen = ref(false);
-
     return {
-      routeLists: routeList,
-      leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value;
+      logout() {
+        userStore.logout();
+        router.push({ path: "/auth" });
       },
     };
   },

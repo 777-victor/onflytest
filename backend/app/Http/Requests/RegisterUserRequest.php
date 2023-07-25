@@ -14,10 +14,6 @@ class RegisterUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        if ($this->user()->cannot('create', Expense::class)) {
-            abort(403);
-        }
-
         return true;
     }
 

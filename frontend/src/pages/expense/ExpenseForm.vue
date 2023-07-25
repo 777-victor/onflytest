@@ -27,7 +27,6 @@
             class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
             mask="#.##"
             :rules="[
-              (val) => val || 'Value is missing',
               (val) => (val && val > 0) || 'Value cannot be less than 0',
             ]"
           />
@@ -84,7 +83,7 @@ const expense = ref({
 });
 
 onMounted(async () => {
-  editing.value = route.params?.id;
+  editing.value = route.params.id !== undefined;
   if (editing.value) {
     const { data } = await fetchExpense(route.params.id);
     console.log(data);
@@ -102,10 +101,11 @@ function onSubmit() {
   let userId = getId.value ?? user.id;
   expense.value.user_id = userId;
 
-  editing.value == true ? handleAddExpense() : handleUpdateExpense();
+  editing.value ? handleUpdateExpense() : handleAddExpense();
 }
 
 function handleAddExpense() {
+  console.log("hello");
   post("expenses", expense.value)
     .then((response) => {
       if (response.status == 201) {
@@ -136,19 +136,18 @@ function handleAddExpense() {
 function handleUpdateExpense() {
   put("expenses/" + expense.value.id, expense.value)
     .then((response) => {
-      if (response.status == 201) {
-        $q.notify({
-          message: "Expense registered successfully",
-          color: "positive",
-          icon: "check_circle_outline",
-        });
-        router.push({ path: "/expenses" });
-      }
+      console.log(response);
+      $q.notify({
+        message: response.data.message,
+        color: "positive",
+        icon: "check_circle_outline",
+      });
+      router.push({ path: "/expenses" });
     })
     .catch((error) => {
       console.log(error);
       let message =
-        error.response?.data?.message || "Failed to register a expense";
+        error.response?.data?.message || "Failed to update this expense";
 
       $q.notify({
         message: message,

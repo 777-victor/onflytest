@@ -34,12 +34,11 @@ export default route(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach((to, from, next) => {
-    if (
-      !to.fullPath.includes("auth") &&
-      !to.fullPath.includes("register") &&
-      window.localStorage.getItem("acess_token") === undefined
-    ) {
-      next({ name: "auth" });
+    if (!to.fullPath.includes("auth") && !to.fullPath.includes("register")) {
+      const token = window.localStorage.getItem("access_token");
+      if (token === undefined || token == null) {
+        next({ path: "/auth" });
+      }
     }
     next();
   });

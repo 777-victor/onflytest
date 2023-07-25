@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->softDeletes();
             $table->string('description', 191);
             $table->float('value');
             $table->date('date');

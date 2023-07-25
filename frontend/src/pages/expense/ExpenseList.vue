@@ -64,7 +64,8 @@
 </template>
 
 <script>
-import { get } from "../../helpers/request";
+import { get, remove } from "../../helpers/request";
+import Swal from "sweetalert2";
 
 export default {
   name: "RegisterPage",
@@ -89,12 +90,6 @@ export default {
         },
         { name: "date", align: "left", label: "Date", field: "date" },
         { name: "actions", label: "Actions", field: "", align: "center" },
-        // {
-        //   name: "action",
-        //   align: "center",
-        //   label: "Action",
-        //   field: "",
-        // },
       ],
       rows: [
         {
@@ -111,7 +106,6 @@ export default {
   },
   methods: {
     redirecToCreateExpense() {
-      // const router = useRouter();
       this.$router.push({ path: "/expenses/create" });
     },
     listExpenses() {
@@ -126,10 +120,46 @@ export default {
       this.$router.push({ path: "/expenses/edit/" + item.id });
     },
 
-    deleteExpense(item) {
-      //sweet alert
-      // alert()
-      // this.$router.push({ path: "/expenses/edit/" + item.id });
+    deleteExpense(prop) {
+      let item = prop.row;
+
+      Swal.fire({
+        title: "Are you sure ?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showDenyButton: false,
+        showCancelButton: true,
+        confirmButtonText: "Delete",
+        denyButtonText: `Cancel`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.handleDeleteExpense(item.id);
+        }
+      });
+    },
+
+    handleDeleteExpense(id) {
+      remove("expenses/" + id)
+        .then((response) => {
+          this.$q.notify({
+            message: response?.message,
+            color: "positive",
+            icon: "check_circle_outline",
+          });
+        })
+        .catch((error) => {
+          let message =
+            error.response?.message || "Failed to delete this expense";
+
+          this.$q.notify({
+            message: message,
+            color: "negative",
+            icon: "error",
+          });
+        })
+        .finally(() => {
+          this.listExpenses();
+        });
     },
   },
 };

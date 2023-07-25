@@ -100,18 +100,16 @@ export default {
 
       post("register", this.form)
         .then((response) => {
-          if (response.status == 201) {
-            const { data } = response;
-            const userStore = useUserStore();
-            userStore.setUser(data.user);
-            userStore.setToken(data.token);
+          const { data } = response;
+          const userStore = useUserStore();
+          userStore.setUser(data.user);
+          userStore.setToken(data.token);
 
-            this.$q.notify({
-              message: "User registered successfully",
-              color: "positive",
-              icon: "check_circle_outline",
-            });
-          }
+          this.$q.notify({
+            message: "User registered successfully",
+            color: "positive",
+            icon: "check_circle_outline",
+          });
         })
         .catch((error) => {
           let message =
