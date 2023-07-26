@@ -4,7 +4,7 @@ composer install
 
 config your .env project
 
-I personally you mailtrap to test mails
+I personally use mailtrap to test mails
 and database to queue connection.
 
 php artisan migrate:refresh --seed
@@ -21,3 +21,5 @@ php artisan queue:work
 
 User: victorboaventcampos@gmail.com or victor@admin.com
 password: 12345678
+
+PS: Certificate that url in .env front is equal to the url of the serve
