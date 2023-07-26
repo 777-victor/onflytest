@@ -18,7 +18,7 @@ class ExpenseFactory extends Factory
     public function definition(): array
     {
         return [
-            'description' => $this->faker->title(),
+            'description' => $this->faker->sentence(nbWords: 2),
             'value' => $this->faker->numberBetween(0.1, 100000),
             'date' => $this->faker->date('Y-m-d'),
             'user_id' => User::factory(),
