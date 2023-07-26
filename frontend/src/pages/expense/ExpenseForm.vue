@@ -48,16 +48,6 @@
             </template>
           </q-input>
 
-          <!-- <q-input
-            v-model="expense.date"
-            type="date"
-            mask="YYYY-MM-DD"
-            label="Date of the expense"
-            outlined
-            class="col-lg-6 col-md-6 col-sm-12 col-xs-12"
-            :rules="[(val) => (val && val.length > 0) || 'Date is missing']"
-          /> -->
-
           <div class="col-12 row justify-center">
             <q-btn
               label="Submit"
@@ -74,6 +64,13 @@
           </div>
         </q-form>
       </q-card-section>
+
+      <q-inner-loading
+        :showing="fechtingExpense"
+        label="Please wait..."
+        label-class="text-teal"
+        label-style="font-size: 1.1em"
+      />
     </q-card>
   </q-page>
 </template>
@@ -90,22 +87,29 @@ const userStore = useUserStore();
 const $q = useQuasar();
 const { getId } = storeToRefs(userStore);
 const submiting = ref(false);
+const fechtingExpense = ref(false);
 const editing = ref(false);
 const router = useRouter();
 const route = useRoute(); // actual route
 const expense = ref({
   id: null,
   description: "",
-  value: 0,
+  value: null,
   date: "",
   user_id: null,
 });
 
 onMounted(async () => {
   editing.value = route.params.id !== undefined;
+
   if (editing.value) {
-    const { data } = await fetchExpense(route.params.id);
-    expense.value = data.expense;
+    fechtingExpense.value = true;
+    try {
+      const { data } = await fetchExpense(route.params.id);
+      expense.value = data.expense;
+    } finally {
+      fechtingExpense.value = false;
+    }
   }
 });
 

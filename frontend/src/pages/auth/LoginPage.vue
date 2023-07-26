@@ -18,8 +18,9 @@
         </q-card-section>
         <q-card-section>
           <q-btn
+            :loading="submiting"
             style="border-radius: 8px"
-            color="dark"
+            color="primary"
             rounded
             size="md"
             label="Sign in"
@@ -55,6 +56,7 @@ import { useRouter } from "vue-router";
 const $q = useQuasar();
 const router = useRouter();
 const userStore = useUserStore();
+const submiting = ref(false);
 const login = ref({
   email: "",
   password: "",
@@ -68,6 +70,7 @@ onMounted(() => {
 });
 
 async function onSubmit() {
+  submiting.value = true;
   await userStore.getSanctumCookie();
   try {
     const data = await userStore.login(login.value);
@@ -84,6 +87,8 @@ async function onSubmit() {
       color: "negative",
       icon: "error",
     });
+  } finally {
+    submiting.value = false;
   }
 }
 </script>

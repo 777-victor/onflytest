@@ -2,6 +2,8 @@
   <div class="q-pa-md">
     <q-table
       :grid="grid"
+      class="statement-table"
+      virtual-scroll
       flat
       bordered
       title="Expenses"
@@ -10,7 +12,6 @@
       row-key="id"
       :loading="loading"
       v-model:pagination="pagination"
-      binary-state-sort
       @request="listExpenses"
     >
       <template v-slot:top-right="">
@@ -20,13 +21,12 @@
       </template>
 
       <template v-slot:body-cell-actions="props">
-        <!-- <component :is="grid ? 'div' : 'q-td'" :props="props"> -->
         <q-td :props="props">
           <q-btn
             dense
             round
             flat
-            color="grey"
+            color="primary"
             @click="editExpense(props)"
             icon="edit"
           >
@@ -36,74 +36,121 @@
             dense
             round
             flat
-            color="grey"
+            color="negative"
             @click="deleteExpense(props)"
             icon="delete"
           >
             <q-tooltip v-close-popup> Remove expense </q-tooltip>
           </q-btn>
         </q-td>
-        <!-- </component> -->
+      </template>
+
+      <template v-slot:item="props">
+        <div
+          class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 grid-style-transition"
+          :style="props.selected ? 'transform: scale(0.95);' : ''"
+        >
+          <q-card :class="props.selected ? 'bg-grey-2' : ''">
+            <q-list dense>
+              <q-item v-for="col in props.cols" :key="col.name">
+                <q-item-section>
+                  <q-item-label>{{ col.label }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <div v-if="col.name === 'actions'">
+                    <q-btn
+                      dense
+                      round
+                      flat
+                      color="primary"
+                      @click="editExpense(props)"
+                      icon="edit"
+                    >
+                      <q-tooltip v-close-popup> Edit expense </q-tooltip>
+                    </q-btn>
+                    <q-btn
+                      dense
+                      round
+                      flat
+                      color="negative"
+                      @click="deleteExpense(props)"
+                      icon="delete"
+                    >
+                      <q-tooltip v-close-popup> Remove expense </q-tooltip>
+                    </q-btn>
+                  </div>
+                  <q-item-label
+                    v-else
+                    caption
+                    :class="col.classes ? col.classes : ''"
+                    >{{ col.value }}</q-item-label
+                  >
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card>
+        </div>
       </template>
     </q-table>
   </div>
 </template>
 
 <script>
+import { useQuasar } from "quasar";
+import { ref, onMounted, computed, defineComponent } from "vue";
+import { useRouter } from "vue-router";
 import { get, remove } from "../../helpers/request";
 import Swal from "sweetalert2";
 
-export default {
+export default defineComponent({
   name: "RegisterPage",
-  data() {
-    return {
-      loading: false,
-      columns: [
-        {
-          name: "description",
-          label: "Description",
-          align: "left",
-          field: (row) => row.description,
-          format: (val) => `${val}`,
-          sortable: true,
-        },
-        {
-          name: "value",
-          align: "left",
-          label: "Value",
-          field: "value",
-          sortable: true,
-        },
-        { name: "date", align: "left", label: "Date", field: "date" },
-        { name: "actions", label: "Actions", field: "", align: "center" },
-      ],
-      pagination: {
-        sortBy: "desc",
-        descending: false,
-        page: 1,
-        rowsPerPage: 3,
-        rowsNumber: 10,
+  setup(props, { attrs, slots, emit }) {
+    const $q = useQuasar();
+    const router = useRouter();
+    const loading = ref(false);
+    const pagination = ref({
+      sortBy: "desc",
+      descending: false,
+      page: 1,
+      rowsPerPage: 5,
+      rowsNumber: 10,
+    });
+    const columns = [
+      {
+        name: "description",
+        label: "Description",
+        align: "left",
+        field: (row) => row.description,
+        format: (val) => `${val}`,
+        sortable: true,
       },
-      rows: [],
-    };
-  },
-  computed: {
-    grid() {
-      return this.$q.screen.xs;
-    },
-  },
+      {
+        name: "value",
+        align: "left",
+        label: "Value",
+        field: "value",
+        sortable: true,
+      },
+      { name: "date", align: "left", label: "Date", field: "date" },
+      { name: "actions", label: "Actions", field: "", align: "center" },
+    ];
 
-  mounted() {
-    this.listExpenses();
-  },
-  methods: {
-    redirecToCreateExpense() {
-      this.$router.push({ path: "/expenses/create" });
-    },
+    const rows = ref(Array());
 
-    listExpenses(props) {
-      this.loading = true;
-      let { page, rowsPerPage } = this.pagination;
+    const grid = computed({
+      get: (_) => $q.screen.xs,
+      set: (v) => {
+        emit("update:grid", v);
+      },
+    });
+
+    onMounted(() => {
+      listExpenses();
+    });
+
+    function listExpenses(props) {
+      loading.value = true;
+      let { page, rowsPerPage } = pagination.value;
 
       if (props) {
         page = props.pagination.page;
@@ -113,24 +160,28 @@ export default {
       get(`expenses?page=${page}&perPage=${rowsPerPage}`)
         .then((response) => {
           const { data } = response;
-          this.rows = data.expenses;
+          rows.value = data.expenses;
 
           const meta = data.meta;
-          this.pagination.page = meta.current_page;
-          this.pagination.rowsPerPage = meta.per_page;
-          this.pagination.rowsNumber = meta.total;
+          pagination.value.page = meta.current_page;
+          pagination.value.rowsPerPage = meta.per_page;
+          pagination.value.rowsNumber = meta.total;
         })
         .finally(() => {
-          this.loading = false;
+          loading.value = false;
         });
-    },
+    }
 
-    editExpense(prop) {
+    function redirecToCreateExpense() {
+      router.push({ path: "/expenses/create" });
+    }
+
+    function editExpense(prop) {
       let item = prop.row;
-      this.$router.push({ path: "/expenses/edit/" + item.id });
-    },
+      router.push({ path: "/expenses/edit/" + item.id });
+    }
 
-    deleteExpense(prop) {
+    function deleteExpense(prop) {
       let item = prop.row;
 
       Swal.fire({
@@ -143,16 +194,16 @@ export default {
         denyButtonText: `Cancel`,
       }).then((result) => {
         if (result.isConfirmed) {
-          this.handleDeleteExpense(item.id);
+          handleDeleteExpense(item.id);
         }
       });
-    },
+    }
 
-    handleDeleteExpense(id) {
+    function handleDeleteExpense(id) {
       remove("expenses/" + id)
         .then((response) => {
-          this.$q.notify({
-            message: response?.message,
+          $q.notify({
+            message: response?.data?.message ?? "Expense deleted sucessfully",
             color: "positive",
             icon: "check_circle_outline",
           });
@@ -161,16 +212,34 @@ export default {
           let message =
             error.response?.message || "Failed to delete this expense";
 
-          this.$q.notify({
+          $q.notify({
             message: message,
             color: "negative",
             icon: "error",
           });
         })
         .finally(() => {
-          this.listExpenses();
+          listExpenses();
         });
-    },
+    }
+
+    return {
+      $q,
+      loading,
+      pagination,
+      columns,
+      rows,
+      grid,
+      listExpenses,
+      redirecToCreateExpense,
+      editExpense,
+      deleteExpense,
+    };
   },
-};
+});
 </script>
+
+<style lang="sass">
+.grid-style-transition
+  transition: transform .28s, background-color .28s
+</style>

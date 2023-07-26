@@ -35,7 +35,6 @@ export const useUserStore = defineStore("user", {
     },
 
     setUser(payload) {
-      console.log("oi");
       window.localStorage.setItem("user", JSON.stringify(payload));
 
       if (payload.id) this.id = payload.id;
