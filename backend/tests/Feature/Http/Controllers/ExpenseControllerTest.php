@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Http\Controllers;
 
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 use App\Models\User;
+use App\Notifications\ExpenseRegistered;
 use Laravel\Sanctum\Sanctum;
 use Database\Factories\ExpenseFactory;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -27,6 +29,7 @@ class ExpenseControllerTest extends TestCase
 
     public function test_it_should_create_expense(): void
     {
+        Notification::fake();
 
         $expenseAtributes = array(
             'description' => $this->faker->sentence(nbWords: 2),
@@ -42,6 +45,11 @@ class ExpenseControllerTest extends TestCase
         );
 
         $response->assertCreated();
+
+        Notification::assertSentTo(
+            [$this->user],
+            ExpenseRegistered::class
+        );
     }
 
     /**
